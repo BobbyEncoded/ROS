@@ -38,9 +38,11 @@
 import rospy
 import rosbag
 from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import Imu
 from math import pi
 from tf2_msgs.msg import TFMessage
 from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import Vector3
 import tf
 
 def make_tf_msg(x, y, theta, t): #This sets up the transform maker, how the ROSbag file makes the TF topic
@@ -65,7 +67,7 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
         for line in dataset.readlines(): #For each line in the dataset, which is the CSV file
             line = line.strip() #Get the line
             tokens = line.split(', ') #And break it into an array of each CSV part
-            if len(tokens) <= 2: #Ignore the terms if they are less than 2
+            if len(tokens) <= 2: #Ignore the loop if they are less than 2
                 continue
             if 1:  #Ignore this line, we're not doing the .clf stuff
                 msg = LaserScan() #Sick_Front is a Laser Scan using the Sick sensor
@@ -75,7 +77,7 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
                     rospy.logwarn("unsupported scan format")
                     continue''' #This part is a check to make sure you're using the right file
 
-                msg.header.frame_id = 'SICK_FRONT'  #The message header tells that this is a laser scan
+                msg.header.frame_id = 'SICK_FRONT'  #The message header labels the topic, I think
                 t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds
                 msg.header.stamp = t  #And now it's the header
                 msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
@@ -103,7 +105,7 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
                     rospy.logwarn("unsupported scan format")
                     continue''' #This part is a check to make sure you're using the right file
 
-                msg.header.frame_id = 'SICK_REAR'  #The message header tells that this is a laser scan
+                msg.header.frame_id = 'SICK_REAR'  #The message header labels the topic, I think
                 t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds
                 msg.header.stamp = t  #And now it's the header
                 msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
@@ -116,6 +118,39 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
                 msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]] #This is the part where it pastes the data into that message of the bag file
 
                 bag.write('SICK_REAR', msg, t)  #Create this and call it the "laser" topic in the bag file
+
+    with open('Bicocca_2009-02-25b-IMU_STRETCHED.csv') as dataset: #Open the IMU file and use it
+        for line in dataset.readlines(): #For each line in the dataset, which is the CSV file
+            line = line.strip() #Get the line
+            tokens = line.split(', ') #And break it into an array of each CSV part
+            if len(tokens) <= 2: #Ignore the terms if they are less than 2
+                continue
+            msg = Imu() #IMU_STRETCHED is the IMU datatype using the IMU_STRETCHED sensor
+
+            msg.header.frame_id = 'IMU'  #The message header labels the topic, I think
+            t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds
+            msg.header.stamp = t  #And now it's the header
+            msg.orientation_covariance = [float(o) for o in tokens[11:20]]  #This is incorrect, but I don't know how to parse R1..R9 because it's a list of 9 data points, which doesn't correlate to orientation.
+
+'''We are now going to define the angular velocities and linear velocities in the IMU type in the bag file by their appropriate numbers from the rawseeds files'''
+
+            angvel = Vector3()
+            angvel.x = float(tokens[5])
+            angvel.y = float(tokens[6])
+            angvel.z = float(tokens[7])
+            msg.angular_velocity.x = angvel.x
+            msg.angular_velocity.y = angvel.y
+            msg.angular_velocity.z = angvel.z
+
+            linacc = Vector3()
+            linacc.x = float(tokens[2])
+            linacc.y = float(tokens[3])
+            linacc.z = float(tokens[4])
+            msg.linear_acceleration.x = linacc.x
+            msg.linear_acceleration.y = linacc.y
+            msg.linear_acceleration.z = linacc.z
+
+            bag.write('IMU', msg, t)  #Create this and call it the "IMU" topic in the bag file
 
                 #odom_x, odom_y, odom_theta = [float(r) for r in tokens[(num_scans + 2):(num_scans + 5)]]  #The .clf file writes the odometry data in the last 3 spots of the file, so this is irrelevant since we're using a CSV
                 #tf_msg = make_tf_msg(odom_x, odom_y, odom_theta, t) #This needs to be changed to real odometry data
