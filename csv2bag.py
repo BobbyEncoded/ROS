@@ -195,6 +195,7 @@ def make_tf4_msg(t): #This sets up the transform maker, how the ROSbag file make
     msg = TFMessage()
     msg.transforms.append(trans)
     return msg
+
 with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file and use it
     with open('SICK_FRONT_Matched_CSV.csv') as dataset: #Open the Sick_Front.csv and use it
         for line in dataset.readlines(): #For each line in the dataset, which is the CSV file
@@ -202,27 +203,23 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             tokens = line.split(',') #And break it into an array of each CSV part
             if len(tokens) <= 2: #Ignore the terms if they are less than 2
                 continue
-            if 1:  #Ignore this line, we're not doing the .clf stuff
-                msg = LaserScan() #Sick_Front is a Laser Scan using the Sick sensor
-                num_scans = int(tokens[1]) #The number of scans is the first term
-                '''if num_scans != 181 or len(tokens) < num_scans + 9:
-                    rospy.logwarn("unsupported scan format")
-                    continue''' #This part is a check to make sure you're using the right file
+		
+            msg = LaserScan() #Sick_Front is a Laser Scan using the Sick sensor
+            num_scans = int(tokens[1]) #The number of scans is the first term
+            msg.header.frame_id = 'SICK_FRONT'  #The message header tells that this is a laser scan
+            t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds               
+            msg.header.stamp = t  #And now it's the header
+            msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
+            msg.angle_max = 90.0 / 180.0 * pi  #This is the maximum angle of the sensor scan
+            msg.angle_increment = pi / num_scans #Each increment is how far the sensor moves in angular movement between scans
+            msg.time_increment = 0.2 / 360.0  #This is how long each scan takes per angle?
+            msg.scan_time = 0.2  #This is how long each scan takes?
+            msg.range_min = 0.001  #This is the minimum range of the sensor?
+            msg.range_max = 50.0  #This is the maximum range of the sensor?
+            msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]] #This is the part where it pastes the data into that message of the bag file
+            msg.intensities = []
 
-                msg.header.frame_id = 'SICK_FRONT'  #The message header tells that this is a laser scan
-                t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds               
-		msg.header.stamp = t  #And now it's the header
-                msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
-                msg.angle_max = 90.0 / 180.0 * pi  #This is the maximum angle of the sensor scan
-                msg.angle_increment = pi / num_scans #Each increment is how far the sensor moves in angular movement between scans
-                msg.time_increment = 0.2 / 360.0  #This is how long each scan takes per angle?
-                msg.scan_time = 0.2  #This is how long each scan takes?
-                msg.range_min = 0.001  #This is the minimum range of the sensor?
-                msg.range_max = 50.0  #This is the maximum range of the sensor?
-                msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]] #This is the part where it pastes the data into that message of the bag file
-		msg.intensities = []
-
-                bag.write('SICK_FRONT', msg, t)  #Create this and call it the "SICK_FRONT" topic in the bag file
+            bag.write('SICK_FRONT', msg, t)  #Create this and call it the "SICK_FRONT" topic in the bag file
 
     with open('SICK_REAR_Matched_CSV.csv') as dataset: #Open the Sick_Front.csv and use it
         for line in dataset.readlines(): #For each line in the dataset, which is the CSV file
@@ -230,28 +227,23 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             tokens = line.split(',') #And break it into an array of each CSV part
             if len(tokens) <= 2: #Ignore the terms if they are less than 2
                 continue
-            if 1:  #Ignore this line, we're not doing the .clf stuff
-                msg = LaserScan() #Sick_Front is a Laser Scan using the Sick sensor
-                num_scans = int(tokens[1]) #The number of scans is the first term
+            msg = LaserScan() #Sick_Front is a Laser Scan using the Sick sensor
+            num_scans = int(tokens[1]) #The number of scans is the first term
 
-                '''if num_scans != 181 or len(tokens) < num_scans + 9:
-                    rospy.logwarn("unsupported scan format")
-                    continue''' #This part is a check to make sure you're using the right file
+            msg.header.frame_id = 'SICK_REAR'  #The message header tells that this is a laser scan
+            t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds
+            msg.header.stamp = t  #And now it's the header
+            msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
+            msg.angle_max = 90.0 / 180.0 * pi  #This is the maximum angle of the sensor scan
+            msg.angle_increment = pi / num_scans #Each increment is how far the sensor moves in angular movement between scans
+            msg.time_increment = 0.2 / 360.0  #This is how long each scan takes per angle?
+            msg.scan_time = 0.2  #This is how long each scan takes?
+            msg.range_min = 0.001  #This is the minimum range of the sensor?
+            msg.range_max = 50.0  #This is the maximum range of the sensor?
+            msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]] #This is the part where it pastes the data into that message of the bag file
+            msg.intensities = []
 
-                msg.header.frame_id = 'SICK_REAR'  #The message header tells that this is a laser scan
-                t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds
-                msg.header.stamp = t  #And now it's the header
-                msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
-                msg.angle_max = 90.0 / 180.0 * pi  #This is the maximum angle of the sensor scan
-                msg.angle_increment = pi / num_scans #Each increment is how far the sensor moves in angular movement between scans
-                msg.time_increment = 0.2 / 360.0  #This is how long each scan takes per angle?
-                msg.scan_time = 0.2  #This is how long each scan takes?
-                msg.range_min = 0.001  #This is the minimum range of the sensor?
-                msg.range_max = 50.0  #This is the maximum range of the sensor?
-                msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]] #This is the part where it pastes the data into that message of the bag file
-		msg.intensities = []
-
-                bag.write('SICK_REAR', msg, t)  #Create this and call it the "SICK_REAR" topic in the bag file
+            bag.write('SICK_REAR', msg, t)  #Create this and call it the "SICK_REAR" topic in the bag file
 
     with open('Bicocca_2009-02-25b-ODOMETRY_XYT_Matched.csv') as dataset: #Open the Sick_Front.csv and use it
 	for line in dataset.readlines(): #For each line in the dataset, which is the CSV file
@@ -259,17 +251,16 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             tokens = line.split(',') #And break it into an array of each CSV part
             if len(tokens) <= 2: #Ignore the terms if they are less than 2
                 continue
-	    if 1:  #Ignore this line, we're not doing the .clf stuff
-		t = rospy.Time(float(tokens[0]))
-                odom_x, odom_y, odom_theta = [float(r) for r in tokens[(4):(7)]]  #Collects the odometry data in the file and loads it 
-                tf_msg = make_tf_msg(odom_x, odom_y, odom_theta, t) #This needs to be changed to real odometry data
-                bag.write('tf', tf_msg, t)  #This writes the transform based on the odometry data
-		tf_msg = make_tf2_msg(t)
-                bag.write('tf', tf_msg, t)  #This writes the transform for the SICK to the base_link
-		tf_msg = make_tf3_msg(t)
-                bag.write('tf', tf_msg, t)  #This writes the transform for the footprint based on the base link
-		tf_msg = make_tf4_msg(t)
-                bag.write('tf', tf_msg, t)  #This writes the transform for the IMU based on the base link
+            t = rospy.Time(float(tokens[0]))
+            odom_x, odom_y, odom_theta = [float(r) for r in tokens[(4):(7)]]  #Collects the odometry data in the file and loads it 
+            tf_msg = make_tf_msg(odom_x, odom_y, odom_theta, t) #This needs to be changed to real odometry data
+            bag.write('tf', tf_msg, t)  #This writes the transform based on the odometry data
+            tf_msg = make_tf2_msg(t)
+            bag.write('tf', tf_msg, t)  #This writes the transform for the SICK to the base_link
+            tf_msg = make_tf3_msg(t)
+            bag.write('tf', tf_msg, t)  #This writes the transform for the footprint based on the base link
+            tf_msg = make_tf4_msg(t)
+            bag.write('tf', tf_msg, t)  #This writes the transform for the IMU based on the base link
 
     with open('IMU_Matched_CSV.csv') as dataset: #Open the IMU file and use it
         for line in dataset.readlines(): #For each line in the dataset, which is the CSV file
@@ -309,9 +300,3 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             msg.linear_acceleration.z = linacc.z
 
 	    bag.write('IMU', msg, t) #Create this and call it the "IMU" topic in the bag file
-
-            '''elif tokens[0] == 'ODOM':
-                odom_x, odom_y, odom_theta = [float(t) for t in tokens[1:4]]
-                t = rospy.Time(float(tokens[7]))
-                tf_msg = make_tf_msg(odom_x, odom_y, odom_theta, t)
-                bag.write('tf', tf_msg, t)'''
