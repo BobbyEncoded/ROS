@@ -299,4 +299,4 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             msg.linear_acceleration.y = linacc.y
             msg.linear_acceleration.z = linacc.z
 
-bag.write('IMU', msg, t) #Create this and call it the "IMU" topic in the bag file
+            bag.write('IMU', msg, t) #Create this and call it the "IMU" topic in the bag file
