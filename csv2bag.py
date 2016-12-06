@@ -209,11 +209,11 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             msg.header.frame_id = 'SICK_FRONT'  #The message header tells that this is a laser scan
             t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds               
             msg.header.stamp = t  #And now it's the header
-            msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
-            msg.angle_max = 90.0 / 180.0 * pi  #This is the maximum angle of the sensor scan
-            msg.angle_increment = pi / num_scans #Each increment is how far the sensor moves in angular movement between scans
-            msg.time_increment = 0.2 / 360.0  #This is how long each scan takes per angle?
-            msg.scan_time = 0.2  #This is how long each scan takes?
+            msg.angle_min = (-22.625 / 180.0) * pi  #This is the minimum angle of the sensor scan
+            msg.angle_max = (22.625 / 180.0) * pi  #This is the maximum angle of the sensor scan
+            msg.angle_increment = (0.025 / 180) * pi #Each increment is how far the sensor moves in angular movement between scans
+            msg.time_increment = 0.027 / num_scans  #This is how long each scan takes per angle?
+            msg.scan_time = 0.027  #This is how long each whole scan
             msg.range_min = 0.001  #This is the minimum range of the sensor?
             msg.range_max = 50.0  #This is the maximum range of the sensor?
             msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]] #This is the part where it pastes the data into that message of the bag file
@@ -233,11 +233,11 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             msg.header.frame_id = 'SICK_REAR'  #The message header tells that this is a laser scan
             t = rospy.Time(float(tokens[0]))  #The first term states the time in seconds
             msg.header.stamp = t  #And now it's the header
-            msg.angle_min = -90.0 / 180.0 * pi  #This is the minimum angle of the sensor scan
-            msg.angle_max = 90.0 / 180.0 * pi  #This is the maximum angle of the sensor scan
-            msg.angle_increment = pi / num_scans #Each increment is how far the sensor moves in angular movement between scans
-            msg.time_increment = 0.2 / 360.0  #This is how long each scan takes per angle?
-            msg.scan_time = 0.2  #This is how long each scan takes?
+            msg.angle_min = (-22.625 / 180.0) * pi  #This is the minimum angle of the sensor scan
+            msg.angle_max = (22.625 / 180.0) * pi  #This is the maximum angle of the sensor scan
+            msg.angle_increment = (0.025 / 180) * pi #Each increment is how far the sensor moves in angular movement between scans
+            msg.time_increment = 0.027 / num_scans  #This is how long each scan takes per angle?
+            msg.scan_time = 0.027  #This is how long each scan takes?
             msg.range_min = 0.001  #This is the minimum range of the sensor?
             msg.range_max = 50.0  #This is the maximum range of the sensor?
             msg.ranges = [float(r) for r in tokens[2:(num_scans + 2)]] #This is the part where it pastes the data into that message of the bag file
@@ -299,4 +299,4 @@ with rosbag.Bag('rawseeds.bag', 'w') as bag: #Create the rawseeds.bag bag file a
             msg.linear_acceleration.y = linacc.y
             msg.linear_acceleration.z = linacc.z
 
-	    bag.write('IMU', msg, t) #Create this and call it the "IMU" topic in the bag file
+bag.write('IMU', msg, t) #Create this and call it the "IMU" topic in the bag file
